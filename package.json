@@ -1,0 +1,27 @@
+{
+  "name": "rune-backend",
+  "version": "1.0.0",
+  "description": "server for rune app",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dagemtadesse/rune-backend.git"
+  },
+  "keywords": [
+    "backend"
+  ],
+  "author": "https://github.com/dagemtadesse",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dagemtadesse/rune-backend/issues"
+  },
+  "homepage": "https://github.com/dagemtadesse/rune-backend#readme",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3"
+  }
+}

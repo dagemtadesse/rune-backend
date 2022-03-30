@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  fullname  String?
+  handle    String    @unique
+  createdAt DateTime  @default(now())
+  email     String    @unique
+  role      Role      @default(USER)
+  posts     Post[]
+  comments  Comment[]
+  channels  Channel[]
+}
+
+model Channel {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  logo     String?
+  address  String
+  email    String  @unique
+  verified Boolean @default(false)
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+
+  posts Post[]
+
+  parentChannel   Channel?  @relation("channelHeirarchy", fields: [parentChannelId], references: [id])
+  parentChannelId Int?
+  
+  subChannels Channel[] @relation("channelHeirarchy")
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String @unique // todo c
+
+  createAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  upvote   Int @default(0)
+  downvote Int @default(0)
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+
+  post   Post? @relation(fields: [postId], references: [id])
+  postId Int?
+
+  parentComment   Comment?  @relation("commentHeirarchy", fields: [parentCommentId], references: [id])
+  parentCommentId Int?
+
+  subCommnets   Comment[] @relation("commentHeirarchy")
+}
+
+model Post {
+  id       Int    @id @default(autoincrement())
+  text     String @unique
+  mediaUrl String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  upvote   Int @default(0)
+  downvote Int @default(0)
+
+  comments Comment[]
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+
+  channel   Channel @relation(fields: [channelId], references: [id])
+  channelId Int
+}

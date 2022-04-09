@@ -1,18 +1,17 @@
+// load .env 
 import "dotenv/config";
-import express from'express';
 
-// import { PrismaClient } from '@prisma/client';
+import express from 'express';
 
-// const prisma = new PrismaClient()
+import routes from './routes'
 
 const app = express();
 
-app.get('/ping', async () => {
-      
-    // const users = await prisma.user.findMany()
-    
-    // console.log(users);
-});
+// parse json and url-encoded data in the request body
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }))
+// setup routes
+app.use(routes);
 
 const port = process.env.PORT;
 

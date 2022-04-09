@@ -17,10 +17,11 @@ enum Role {
 
 model User {
   id        Int       @id @default(autoincrement())
-  fullname  String?
+  fullname  String
   handle    String    @unique
   createdAt DateTime  @default(now())
   email     String    @unique
+  password  String
   role      Role      @default(USER)
   posts     Post[]
   comments  Comment[]
@@ -40,9 +41,9 @@ model Channel {
 
   posts Post[]
 
-  parentChannel   Channel?  @relation("channelHeirarchy", fields: [parentChannelId], references: [id])
+  parentChannel   Channel? @relation("channelHeirarchy", fields: [parentChannelId], references: [id])
   parentChannelId Int?
-  
+
   subChannels Channel[] @relation("channelHeirarchy")
 }
 
@@ -62,10 +63,10 @@ model Comment {
   post   Post? @relation(fields: [postId], references: [id])
   postId Int?
 
-  parentComment   Comment?  @relation("commentHeirarchy", fields: [parentCommentId], references: [id])
+  parentComment   Comment? @relation("commentHeirarchy", fields: [parentCommentId], references: [id])
   parentCommentId Int?
 
-  subCommnets   Comment[] @relation("commentHeirarchy")
+  subCommnets Comment[] @relation("commentHeirarchy")
 }
 
 model Post {

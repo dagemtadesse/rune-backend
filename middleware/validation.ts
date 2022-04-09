@@ -1,8 +1,6 @@
 import { body } from "express-validator";
-
 import { validationErrorHandler } from "./errors";
 
-// TODO implementation
 export const registrationValidations = [
     body('fullname').isLength({ min: 4 }),
 
@@ -30,6 +28,6 @@ export const loginValidations = [
 
     body('password')
         .isString(),
-        
+
     validationErrorHandler
 ];

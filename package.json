@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "start": "ts-node index.ts",
-    "dev:server": "nodemon"
+    "dev:init": "npx prisma migrate && npx prisma generate",
+    "dev:start": "nodemon"
   },
   "repository": {
     "type": "git",

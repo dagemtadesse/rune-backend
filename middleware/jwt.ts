@@ -18,9 +18,11 @@ export function issueJWT(req: Request, res: Response, next: NextFunction) {
 
 export function verifyJWT(role?: string) {
     return async function(req: Request, res: Response, next: NextFunction) {
+        let token = req.headers['authorization'] as string; // get the authorization header
+        const jwt = token.split(' ')[1]; // split "Bearer <token>" and take the token
         try {
             // decode the JWT and verify if its valid
-            const payload = jsonwebtoken.verify(req.body.token, process.env.SECRET!);
+            const payload = jsonwebtoken.verify(jwt, process.env.SECRET!);
             // find the user using the id from jwt token 
             const user = await prisma.user.findUnique({where: { id: Number(payload.sub)}});
             //  pass it to the next middleware

@@ -3,7 +3,6 @@ import "dotenv/config";
 
 import express from 'express';
 import morgan from 'morgan';
-import fileupload from "express-fileupload";
 
 import routes from './routes'
 
@@ -13,15 +12,12 @@ app.use(morgan('dev'))
 // parse json and url-encoded data in the request body
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
-// setup fileupload
-// Option
-app.use(fileupload({
-    safeFileNames: true,
-    useTempFiles: true,
-    preserveExtension: true
-}));
+
+
 // setup routes
 app.use(routes);
+// setup static assets
+app.use(express.static(process.env.STORAGE_DIR!))
 
 const port = process.env.PORT;
 

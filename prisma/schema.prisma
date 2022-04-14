@@ -21,6 +21,8 @@ model User {
   handle    String    @unique
   createdAt DateTime  @default(now())
   email     String    @unique
+  avatar    String?
+  mimeType  String?
   password  String
   role      Role      @default(USER)
   posts     Post[]
@@ -32,6 +34,7 @@ model Channel {
   id       Int     @id @default(autoincrement())
   name     String  @unique
   logo     String?
+  mimeType String?
   address  String
   email    String  @unique
   verified Boolean @default(false)
@@ -70,9 +73,10 @@ model Comment {
 }
 
 model Post {
-  id       Int    @id @default(autoincrement())
-  text     String @unique
-  mediaUrl String
+  id       Int     @id @default(autoincrement())
+  text     String
+  mediaUrl String?
+  mimeType String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
 import bcrypt from 'bcryptjs';
 import { verifyJWT } from "../middleware/jwt";
+import { prisma } from ".";
 
 export const userRouter = express.Router();
-const prisma = new PrismaClient();
 // get user
 userRouter.get('/user/:handle', verifyJWT(), async (req, res) => {
     const user = await prisma.user.findUnique({
@@ -16,7 +15,7 @@ userRouter.get('/user/:handle', verifyJWT(), async (req, res) => {
 
 // update user
 userRouter.put('/user', verifyJWT(), async (req, res) => {
-    // TODO: Implementation
+    // TODO: validation
     let updated = await prisma.user.update({
         where: { id: res.locals.user.id },
         data: {
@@ -34,11 +33,11 @@ userRouter.put('/user', verifyJWT(), async (req, res) => {
     res.json(updated);
 });
 
-// get user
+// delete user
 userRouter.delete('/user', verifyJWT(), async (req, res) => {
-    const updated = await prisma.user.delete({
+    const deleted = await prisma.user.delete({
         where: { id: Number(res.locals.user.id) }
     });
 
-    res.json(updated);
+    res.json(deleted);
 });

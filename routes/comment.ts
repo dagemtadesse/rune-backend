@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
+import { prisma } from ".";
 import { verifyJWT } from "../middleware/jwt";
 
 export const commentRouter = express.Router();
-const prisma = new PrismaClient();
 
 // get comments
 commentRouter.get('/:postId/comments', verifyJWT(), async (req, res) => {
@@ -31,7 +30,7 @@ commentRouter.get('/comment/:id', verifyJWT(), async (req, res) => {
 
 // post comments
 commentRouter.post('/post/:id/comment', verifyJWT(), async (req, res) => {
-    // TODO: Implementation
+    // TODO: validation
     const comment = await prisma.comment.create({
         data: {
             content: req.body.content,
@@ -49,7 +48,7 @@ commentRouter.post('/post/:id/comment', verifyJWT(), async (req, res) => {
 
 // delete comments
 commentRouter.delete('/comment/:id', verifyJWT(), async (req, res) => {
-    // TODO: Implementation
+    // TODO: validation
     const comment = await prisma.comment.delete({
         where: { id: Number(req.params.id) }
     })
@@ -59,7 +58,7 @@ commentRouter.delete('/comment/:id', verifyJWT(), async (req, res) => {
 
 // update comments
 commentRouter.put('/comment/:id', verifyJWT(), async (req, res) => {
-    // TODO: Implementation
+    // TODO: validation
     const updated = await prisma.comment.updateMany({
         where: {
             id: Number(req.params.id),

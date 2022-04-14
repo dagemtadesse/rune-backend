@@ -1,10 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
-import { upload } from ".";
+import { prisma, upload } from ".";
 import { verifyJWT } from "../middleware/jwt";
 
 export const postRouter = express.Router();
-const prisma = new PrismaClient();
 
 // get posts
 postRouter.get('/:channel/posts', verifyJWT(), async (req, res) => {
@@ -24,7 +22,7 @@ postRouter.get('/:channel/posts', verifyJWT(), async (req, res) => {
 });
 
 // get post
-postRouter.get('/post/:id', verifyJWT(), async (req, res) => {
+postRouter.get('/posts/:id', verifyJWT(), async (req, res) => {
     // TODO: validation
     const post = await prisma.post.findUnique({
         where: { id: Number(req.params.id) }
@@ -33,7 +31,7 @@ postRouter.get('/post/:id', verifyJWT(), async (req, res) => {
 });
 
 // delete post
-postRouter.delete('/post/:id', verifyJWT(), async (req, res) => {
+postRouter.delete('/posts/:id', verifyJWT(), async (req, res) => {
     const post = await prisma.post.deleteMany({
         where: {
             id: Number(req.params.id),
@@ -65,7 +63,7 @@ postRouter.post('/:channel/post', verifyJWT(), upload.single("media"), async (re
 });
 
 // update a post
-postRouter.put('/post/:id', verifyJWT(), upload.single("media"), async (req, res) => {
+postRouter.put('/posts/:id', verifyJWT(), upload.single("media"), async (req, res) => {
     // TODO: validation
     const updated = await prisma.post.updateMany({
         where: {

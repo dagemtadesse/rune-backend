@@ -1,9 +1,12 @@
+import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import multer from 'multer';
 
 export const upload = multer({
     dest: process.env.STORAGE_DIR,
 });
+
+export const prisma = new PrismaClient();
 
 import authRouter from './auth';
 import { chanRouter } from './channel';
@@ -12,7 +15,6 @@ import { postRouter } from './post';
 import { userRouter } from './user';
 
 const router = express.Router();
-
 // upload middleware
 router.use(
     '/api/v1',

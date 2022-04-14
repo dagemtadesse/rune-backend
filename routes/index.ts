@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 
 import authRouter from './auth';
 import { chanRouter } from './channel';
@@ -7,6 +8,11 @@ import { postRouter } from './post';
 import { userRouter } from './user';
 
 const router = express.Router();
+
+// upload middleware
+export const upload = multer({
+    dest: process.env.STORAGE_DIR,
+})
 
 router.use(
     '/api/v1',

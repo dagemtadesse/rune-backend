@@ -1,2 +1,2 @@
-# backend for rune (mobil app)
+# backend for rune (mobile app)
 

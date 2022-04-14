@@ -1,9 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { upload } from ".";
-import path from "path";
-import fs from "fs";
-import { v4 as uuid4 } from 'uuid';
 import { verifyJWT } from "../middleware/jwt";
 
 export const chanRouter = express.Router();

@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import express from "express";
+import express, { query } from "express";
 import { UploadedFile } from "express-fileupload";
 import path from "path";
 import fs from "fs";
@@ -11,6 +11,21 @@ const prisma = new PrismaClient();
 
 chanRouter.get('/channels', verifyJWT(), async (req, res, next) => {
     // TODO: data validation
+    const page = Number(req.query.page) || 0;
+    const queryString = req.query.query as string;
+    const size = Number(req.query.size) || 12;
+    
+    const channels = await prisma.channel.findMany({
+        where: {
+            name: {
+                contains: queryString,
+                mode: "insensitive", // case insensitive filtering
+            }
+        },
+        take: size,  // LIMIT of the query
+        skip: page * size // OFFSET
+    });
+    res.json(channels);
 })
 // create a channel
 chanRouter.post("/channel", verifyJWT('ADMIN'), async (req, res, next) => {
@@ -48,9 +63,6 @@ chanRouter.put('/channel/:name', verifyJWT('ADMIN'), async (req, res, next) => {
                 name: req.body.name,
                 address: req.body.address,
                 email: req.body.email,
-                author: {
-                    connect: { id: res.locals.user.id }
-                }
             }
         });
         res.status(201).json({ channel: updatedChannel });

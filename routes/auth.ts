@@ -1,8 +1,9 @@
 import express from 'express';
 
 import { authenticateUser, registerUser } from '../middleware/auth';
-import { registrationValidations, loginValidations} from '../middleware/validation';
-import { issueJWT} from '../middleware/jwt';
+import { registrationValidations, loginValidations } from '../middleware/validation';
+import { issueJWT } from '../middleware/jwt';
+import JSONResponse from '../utils/response';
 
 const authRouter = express.Router();
 
@@ -10,14 +11,16 @@ const authRouter = express.Router();
 // validate the requestBody using newUserValidations middleware then authenticate
 // and send jwt token to the response
 authRouter.post('/user', ...registrationValidations, registerUser, issueJWT, (req, res) => {
-    res.status(301).json({ token: res.locals.token })
+    res.status(201)
+        .json(JSONResponse.success({ token: res.locals.token }))
 });
 
 // login and return JWT token
 // validate the requestBody using loginValidations middleware then authenticate
 // and send jwt token to the response
 authRouter.get("/user-token", ...loginValidations, authenticateUser, issueJWT, (req, res) => {
-    res.status(200).json({ token: res.locals.token })
+    res.status(200)
+        .json(JSONResponse.success({ token: res.locals.token }))
 });
 
 export default authRouter;

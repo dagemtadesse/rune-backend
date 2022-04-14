@@ -1,12 +1,13 @@
 import express from "express";
 import { prisma } from ".";
 import { verifyJWT } from "../middleware/jwt";
+import JSONResponse from "../utils/response";
 
 export const commentRouter = express.Router();
 
 // get comments
 commentRouter.get('/:postId/comments', verifyJWT(), async (req, res) => {
-    // TODO: Implementation
+    // TODO: validation
     const comments = await prisma.comment.findMany({
         where: {
             post: {
@@ -15,7 +16,7 @@ commentRouter.get('/:postId/comments', verifyJWT(), async (req, res) => {
         }
     });
 
-    res.json(comments);
+    res.json(JSONResponse.success(comments));
 });
 
 // get comments
@@ -25,7 +26,7 @@ commentRouter.get('/comment/:id', verifyJWT(), async (req, res) => {
         where: { id: Number(req.params.id) }
     });
 
-    res.json(comment);
+    res.json(JSONResponse.success(comment));
 });
 
 // post comments
@@ -43,7 +44,7 @@ commentRouter.post('/post/:id/comment', verifyJWT(), async (req, res) => {
         }
     });
 
-    res.status(201).json(comment);
+    res.status(201).json(JSONResponse.success(comment));
 });
 
 // delete comments
@@ -53,7 +54,7 @@ commentRouter.delete('/comment/:id', verifyJWT(), async (req, res) => {
         where: { id: Number(req.params.id) }
     })
 
-    res.json(comment);
+    res.json(JSONResponse.success(comment));
 });
 
 // update comments
@@ -71,6 +72,6 @@ commentRouter.put('/comment/:id', verifyJWT(), async (req, res) => {
         }
     });
 
-    res.json(updated)
+    res.json(JSONResponse.success(updated))
 });
 

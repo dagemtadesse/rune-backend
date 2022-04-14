@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from 'bcryptjs';
 import { verifyJWT } from "../middleware/jwt";
 import { prisma } from ".";
+import JSONResponse from "../utils/response";
 
 export const userRouter = express.Router();
 // get user
@@ -10,7 +11,7 @@ userRouter.get('/user/:handle', verifyJWT(), async (req, res) => {
         where: { handle: req.params.handle }
     });
 
-    res.json(user);
+    res.json(JSONResponse.success(user));
 });
 
 // update user
@@ -30,7 +31,7 @@ userRouter.put('/user', verifyJWT(), async (req, res) => {
     let jsonUpdate = updated as any
     // remove the password from the json object
     delete jsonUpdate.password;
-    res.json(updated);
+    res.json(JSONResponse.success(updated));
 });
 
 // delete user
@@ -39,5 +40,5 @@ userRouter.delete('/user', verifyJWT(), async (req, res) => {
         where: { id: Number(res.locals.user.id) }
     });
 
-    res.json(deleted);
+    res.json(JSONResponse.success(deleted));
 });

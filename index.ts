@@ -13,7 +13,6 @@ app.use(morgan('dev'))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
 
-
 // setup routes
 app.use(routes);
 // setup static assets

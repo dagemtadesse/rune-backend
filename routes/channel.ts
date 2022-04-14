@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma, upload } from ".";
 import { verifyJWT } from "../middleware/jwt";
+import JSONResponse from "../utils/response";
 
 export const chanRouter = express.Router();
 
@@ -20,26 +21,22 @@ chanRouter.get('/channels', verifyJWT(), async (req, res, next) => {
         take: size,  // LIMIT of the query
         skip: page * size // OFFSET
     });
-    res.json(channels);
+    res.json(JSONResponse.success(channels));
 })
 // create a channel
 chanRouter.post("/channel", verifyJWT('ADMIN'), async (req, res, next) => {
     // TODO: data validation
-    try {
-        const channel = await prisma.channel.create({
-            data: {
-                name: req.body.name,
-                address: req.body.address,
-                email: req.body.email,
-                author: {
-                    connect: { id: res.locals.user.id }
-                }
+    const channel = await prisma.channel.create({
+        data: {
+            name: req.body.name,
+            address: req.body.address,
+            email: req.body.email,
+            author: {
+                connect: { id: res.locals.user.id }
             }
-        });
-        res.status(201).json({ channel });
-    } catch (error) {
-        next(error);
-    }
+        }
+    });
+    res.status(201).json(JSONResponse.success(channel));
 });
 
 // update a channel
@@ -59,7 +56,7 @@ chanRouter.put('/channel/:name', verifyJWT('ADMIN'), async (req, res, next) => {
         }
     });
 
-    res.status(201).json({ channel: updatedChannel });
+    res.status(201).json(JSONResponse.success(updatedChannel));
 });
 
 // delete a channel
@@ -73,7 +70,7 @@ chanRouter.delete('/channel/:name', verifyJWT('ADMIN'), async (req, res) => {
         }
     });
 
-    res.status(200).json({ removedChannels });
+    res.status(200).json(JSONResponse.success(removedChannels));
 });
 
 // read a channel
@@ -82,13 +79,13 @@ chanRouter.get('/channel/:name', verifyJWT(), async (req, res) => {
         where: { name: req.params.name }
     });
 
-    res.status(200).json({ channel });
+    res.status(200).json(JSONResponse.success(channel));
 });
 
 // update/add image to channel
 chanRouter.post('/channel/:name/logo', verifyJWT('ADMIN'), upload.single("logo"), async (req, res, next) => {
     // TODO: validation
-    await prisma.channel.updateMany({
+    const user = await prisma.channel.updateMany({
         where: {
             name: req.params.name,
             author: {
@@ -100,7 +97,7 @@ chanRouter.post('/channel/:name/logo', verifyJWT('ADMIN'), upload.single("logo")
             mimeType: req.file?.mimetype
         }
     });
-    res.sendStatus(200);
+    res.sendStatus(200).json(JSONResponse.success(user));
 });
 
 // create sub-channel
@@ -130,5 +127,5 @@ chanRouter.post('/channel/:name/sub-channel', verifyJWT('ADMIN'), async (req, re
             }
         }
     });
-    res.status(201).json({ channel: newChannel });
+    res.status(201).json(JSONResponse.success(newChannel));
 });

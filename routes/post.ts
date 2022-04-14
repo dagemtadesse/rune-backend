@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma, upload } from ".";
 import { verifyJWT } from "../middleware/jwt";
+import JSONResponse from "../utils/response";
 
 export const postRouter = express.Router();
 
@@ -18,7 +19,7 @@ postRouter.get('/:channel/posts', verifyJWT(), async (req, res) => {
         take: size,  // LIMIT of the query
         skip: page * size // OFFSET
     })
-    res.json(posts);
+    res.json(JSONResponse.success(posts));
 });
 
 // get post
@@ -27,7 +28,7 @@ postRouter.get('/posts/:id', verifyJWT(), async (req, res) => {
     const post = await prisma.post.findUnique({
         where: { id: Number(req.params.id) }
     });
-    res.json(post); // sends null if a channel is not found
+    res.json(JSONResponse.success(post)); // sends null if a channel is not found
 });
 
 // delete post
@@ -40,7 +41,7 @@ postRouter.delete('/posts/:id', verifyJWT(), async (req, res) => {
             },
         }
     });
-    res.json(post);
+    res.json(JSONResponse.success(post));
 });
 
 // create post
@@ -59,7 +60,7 @@ postRouter.post('/:channel/post', verifyJWT(), upload.single("media"), async (re
             }
         }
     });
-    res.json(post);
+    res.json(JSONResponse.success(post));
 });
 
 // update a post
@@ -78,5 +79,5 @@ postRouter.put('/posts/:id', verifyJWT(), upload.single("media"), async (req, re
             mimeType: req.file?.mimetype,
         }
     });
-    res.json(updated)
+    res.json(JSONResponse.success(updated))
 });

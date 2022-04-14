@@ -52,7 +52,7 @@ model Channel {
 
 model Comment {
   id      Int    @id @default(autoincrement())
-  content String @unique // todo c
+  content String 
 
   createAt  DateTime @default(now())
   updatedAt DateTime @updatedAt

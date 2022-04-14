@@ -12,7 +12,7 @@ const router = express.Router();
 // upload middleware
 export const upload = multer({
     dest: process.env.STORAGE_DIR,
-})
+});
 
 router.use(
     '/api/v1',
@@ -24,6 +24,5 @@ router.use(
     postRouter,
 );
 
-// TODO error handling
-
+// TODO implement default error handling
 export default router;

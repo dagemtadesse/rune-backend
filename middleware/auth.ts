@@ -34,12 +34,9 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
         console.time('DB_CHECK');
         // find user from the db using requests handle form/object
         const user = await prisma.user.findUnique({ where: { handle: reqUser.handle } })
-        console.timeEnd('DB_CHECK');
         if (!user) throw Error(`Unable to find a user with username '${reqUser.handle}'.`)
         // compare the password of the user form db and from the request
-        console.time('HASH_COMPARE');
         const authPassed = await bcrypt.compare(reqUser.password, user.password);
-        console.timeEnd('HASH_COMPARE');
         if (!authPassed) throw Error('The username and password do not match.');
         // pass the user to the next middleware
         res.locals.user = user;

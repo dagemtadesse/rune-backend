@@ -9,20 +9,24 @@ export function validationErrorHandler(req: Request, res: Response, next: NextFu
         next();
         return;
     }
-    
+
     return res.status(400).json(JSONResponse.failure(errors.array()));
 }
 
 export function routeErrorHandler(err: any, req: Request, res: Response, next: NextFunction){
+    console.log(err);
+
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
             const errMsg = "Database error: unique constraint failed";
-            res.json(JSONResponse.failure(err.meta, errMsg));
+            const fields = err.meta as {target: any}
+            res.json(JSONResponse.failure({fields: fields.target}, errMsg));
             return;
     }
     else if(err instanceof JSONResponse){
         res.status(err.statusCode).json(err);
         return;
     }
-    
-    res.status(400).json(err);
+
+    // TODO: handle deletion of referenced items
+    res.status(500).json(JSONResponse.error());
 }

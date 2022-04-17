@@ -32,7 +32,7 @@ export async function authenticateUser(req: Request, res: Response, next: NextFu
         // pass the user to the next middleware
         res.locals.user = user;
         next();
-    }catch(error){
+    } catch (error) {
         next(error);
     }
 }

@@ -16,18 +16,20 @@ enum Role {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  fullname  String
-  handle    String    @unique
-  createdAt DateTime  @default(now())
-  email     String    @unique
-  avatar    String?
-  mimeType  String?
-  password  String
-  role      Role      @default(USER)
-  posts     Post[]
-  comments  Comment[]
-  channels  Channel[]
+  id              Int               @id @default(autoincrement())
+  fullname        String
+  handle          String            @unique
+  createdAt       DateTime          @default(now())
+  email           String            @unique
+  avatar          String?
+  mimeType        String?
+  password        String
+  role            Role              @default(USER)
+  posts           Post[]
+  comments        Comment[]
+  channels        Channel[]
+  postReactions   PostReaction[]
+  commentReaction CommentReaction[]
 }
 
 model Channel {
@@ -52,13 +54,10 @@ model Channel {
 
 model Comment {
   id      Int    @id @default(autoincrement())
-  content String 
+  content String
 
   createAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  upvote   Int @default(0)
-  downvote Int @default(0)
 
   author   User @relation(fields: [authorId], references: [id])
   authorId Int
@@ -69,7 +68,8 @@ model Comment {
   parentComment   Comment? @relation("commentHeirarchy", fields: [parentCommentId], references: [id])
   parentCommentId Int?
 
-  subCommnets Comment[] @relation("commentHeirarchy")
+  subCommnets     Comment[]         @relation("commentHeirarchy")
+  commentReaction CommentReaction[]
 }
 
 model Post {
@@ -81,9 +81,6 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  upvote   Int @default(0)
-  downvote Int @default(0)
-
   comments Comment[]
 
   author   User @relation(fields: [authorId], references: [id])
@@ -91,4 +88,32 @@ model Post {
 
   channel   Channel @relation(fields: [channelId], references: [id])
   channelId Int
+
+  postReactions PostReaction[]
+}
+
+model PostReaction {
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  upvote   Boolean @default(false)
+  downvote Boolean @default(false)
+
+  @@unique([userId, postId])
+}
+
+model CommentReaction {
+  comment      Comment @relation(fields: [commentId], references: [id])
+  commentId Int
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  upvote   Boolean @default(false)
+  downvote Boolean @default(false)
+
+  @@unique([userId, commentId])
 }

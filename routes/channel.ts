@@ -15,7 +15,7 @@ chanRouter.get('/channels', verifyJWT(), async (req, res, next) => {
         where: {
             name: {
                 contains: queryString,
-                mode: "insensitive", // case insensitive filtering
+                mode: "insensitive", // case insensitive filtering &page=10
             }
         },
         take: size,  // LIMIT of the query
@@ -61,7 +61,7 @@ chanRouter.put('/channel/:name', verifyJWT('ADMIN'), async (req, res, next) => {
 
 // delete a channel
 chanRouter.delete('/channel/:name', verifyJWT('ADMIN'), async (req, res) => {
-    const removedChannels = await prisma.channel.deleteMany({
+    const { count } = await prisma.channel.deleteMany({
         where: {
             name: req.params.name,
             author: {
@@ -69,8 +69,8 @@ chanRouter.delete('/channel/:name', verifyJWT('ADMIN'), async (req, res) => {
             }
         }
     });
-
-    res.status(200).json(JSONResponse.success(removedChannels));
+    // removedChannels
+    res.status(200).json(JSONResponse.success());
 });
 
 // read a channel

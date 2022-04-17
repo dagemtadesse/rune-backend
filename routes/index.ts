@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import multer from 'multer';
+import { routeErrorHandler } from '../middleware/errors';
 
 export const upload = multer({
     dest: process.env.STORAGE_DIR,
@@ -26,5 +27,6 @@ router.use(
     postRouter,
 );
 
+router.use(routeErrorHandler);
 // TODO implement default error handling
 export default router;

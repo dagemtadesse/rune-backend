@@ -81,3 +81,33 @@ postRouter.put('/posts/:id', verifyJWT(), upload.single("media"), async (req, re
     });
     res.json(JSONResponse.success(updated))
 });
+
+postRouter.post('/:reactionType/posts/:id', verifyJWT(), async (req, res) => {
+    const reaction = req.params.reactionType;
+    const postId = Number(req.params.id);
+
+    const updated = await prisma.postReaction.upsert({
+        where: {
+            userId_postId: {
+                userId: res.locals.user.id,
+                postId: postId,
+            }
+        },
+        update: {
+            upvote: reaction === 'upvote',
+            downvote: reaction === 'downvote'
+        },
+        create: {
+            upvote: reaction === 'upvote',
+            downvote: reaction === 'downvote',
+            user: {
+                connect: { id: res.locals.user.id }
+            },
+            post: {
+                connect: { id: postId }
+            }
+        }
+    });
+
+    res.json(JSONResponse.success(updated));
+});

@@ -75,3 +75,33 @@ commentRouter.put('/comment/:id', verifyJWT(), async (req, res) => {
     res.json(JSONResponse.success(updated))
 });
 
+commentRouter.post('/:reactionType/comment/:id', verifyJWT(), async (req, res) => {
+    const reaction = req.params.reactionType;
+    const commentId = Number(req.params.id);
+
+    const updated = await prisma.commentReaction.upsert({
+        where: {
+            userId_commentId: {
+                userId: res.locals.user.id,
+                commentId: commentId,
+            }
+        },
+        update: {
+            upvote: reaction === 'upvote',
+            downvote: reaction === 'downvote'
+        },
+        create: {
+            upvote: reaction === 'upvote',
+            downvote: reaction === 'downvote',
+            user: {
+                connect: {id: res.locals.user.id}
+            },
+            comment: {
+                connect: {id: commentId }
+            }
+        }
+    });
+
+    res.json(JSONResponse.success(updated));
+});
+

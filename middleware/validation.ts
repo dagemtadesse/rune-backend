@@ -16,7 +16,7 @@ export const registrationValidations = [
             minUppercase: 1,
             minSymbols: 1
         })
-        .withMessage("Password must be a minimum length of 8 and contain uppercase and a special symbol"),
+        .withMessage("Password must be a minimum length of 8 and must contain uppercase and a special symbol"),
 
     validationErrorHandler
 ];

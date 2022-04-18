@@ -1,12 +1,14 @@
-import express, { Request, Response, NextFunction} from "express";
+import { Vote } from "@prisma/client";
+import express, { Request, Response, NextFunction } from "express";
 import { prisma } from ".";
 import { verifyJWT } from "../middleware/jwt";
+import { countReaction } from "../utils/reaction";
 import JSONResponse from "../utils/response";
 
 export const commentRouter = express.Router();
 
 async function isCommentAuthor(req: Request, res: Response, next: NextFunction) {
-    try{
+    try {
         const commentId = Number(req.params.id);
         const comment = await prisma.comment.findUnique({
             where: { id: commentId }
@@ -15,7 +17,7 @@ async function isCommentAuthor(req: Request, res: Response, next: NextFunction) 
             throw JSONResponse.failure(undefined, "unauthorized access", 401);
         }
         next();
-    }catch(error){
+    } catch (error) {
         next(error);
     }
 }
@@ -23,15 +25,27 @@ async function isCommentAuthor(req: Request, res: Response, next: NextFunction) 
 // get comments
 commentRouter.get('/:postId/comments', verifyJWT(), async (req, res, next) => {
     // TODO: validation
+    const page = Number(req.query.page) || 0;
+    const size = Number(req.query.size) || 12;
     try {
         const comments = await prisma.comment.findMany({
             where: {
                 post: {
                     id: Number(req.params.postId)
                 }
-            }
+            },
+            include: {
+                reactions: true
+            },
+            take: size,  // LIMIT of the query
+            skip: page * size // OFFSET
         });
-        res.json(JSONResponse.success(comments));
+
+        const countedComment = comments.map(comment => {
+            return countReaction(res.locals.user.id, comment);
+        });
+
+        res.json(JSONResponse.success(countedComment));
     } catch (error) { next(error); }
 });
 
@@ -95,8 +109,13 @@ commentRouter.put('/comment/:id', verifyJWT(), isCommentAuthor, async (req, res,
 
 commentRouter.post('/:reactionType/comment/:id', verifyJWT(), async (req, res, next) => {
     try {
-        const reaction = req.params.reactionType;
+        let reaction = req.params.reactionType.toLowerCase();
+        let vote: Vote = Vote.NONE;
+        if(reaction == 'upvote') vote = Vote.UP_VOTE;
+        else if(reaction == 'downvote') vote = Vote.DOWN_VOTE;
+
         const commentId = Number(req.params.id);
+
         const updated = await prisma.commentReaction.upsert({
             where: {
                 userId_commentId: {
@@ -105,12 +124,10 @@ commentRouter.post('/:reactionType/comment/:id', verifyJWT(), async (req, res, n
                 }
             },
             update: {
-                upvote: reaction === 'upvote',
-                downvote: reaction === 'downvote'
+                vote: vote,
             },
             create: {
-                upvote: reaction === 'upvote',
-                downvote: reaction === 'downvote',
+                vote: vote,
                 user: {
                     connect: { id: res.locals.user.id }
                 },

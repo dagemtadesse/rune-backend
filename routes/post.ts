@@ -1,6 +1,8 @@
+import { Vote } from "@prisma/client";
 import express, { Request, Response, NextFunction} from "express";
 import { prisma, upload } from ".";
 import { verifyJWT } from "../middleware/jwt";
+import { countReaction } from "../utils/reaction";
 import JSONResponse from "../utils/response";
 
 export const postRouter = express.Router();
@@ -31,10 +33,17 @@ postRouter.get('/:channelId/posts', verifyJWT(), async (req, res, next) => {
                     id: Number(req.params.channelId)
                 }
             },
+            include: {
+                reactions: true
+            },
             take: size,  // LIMIT of the query
             skip: page * size // OFFSET
         })
-        res.json(JSONResponse.success(posts));
+
+        const countedPosts = posts.map(post => {
+            return countReaction(res.locals.user.id, post);
+        })
+        res.json(JSONResponse.success(countedPosts));
     } catch (error) { next(error); }
 });
 
@@ -104,7 +113,11 @@ postRouter.put('/posts/:id', verifyJWT(), isPostAuthor, upload.single("media"), 
 
 // react to a post
 postRouter.post('/:reactionType/posts/:id', verifyJWT(), async (req, res, next) => {
-    const reaction = req.params.reactionType;
+    let reaction = req.params.reactionType.toLowerCase();
+    let vote: Vote = Vote.NONE;
+    if(reaction == 'upvote') vote = Vote.UP_VOTE;
+    else if(reaction == 'downvote') vote = Vote.DOWN_VOTE;
+    
     const postId = Number(req.params.id);
     try {
         const updated = await prisma.postReaction.upsert({
@@ -115,12 +128,10 @@ postRouter.post('/:reactionType/posts/:id', verifyJWT(), async (req, res, next) 
                 }
             },
             update: {
-                upvote: reaction === 'upvote',
-                downvote: reaction === 'downvote'
+                vote: vote
             },
             create: {
-                upvote: reaction === 'upvote',
-                downvote: reaction === 'downvote',
+                vote: vote,
                 user: {
                     connect: { id: res.locals.user.id }
                 },

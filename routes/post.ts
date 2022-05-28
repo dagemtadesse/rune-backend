@@ -71,19 +71,20 @@ postRouter.delete('/posts/:id', verifyJWT(), isPostAuthor, async (req, res, next
 });
 
 // create post
-postRouter.post('/:channel/post', verifyJWT(), upload.single("media"), async (req, res, next) => {
+postRouter.post('/:channelId/post', verifyJWT(), upload.single("media"), async (req, res, next) => {
     // TODO: validation,
     try {
         const post = await prisma.post.create({
             data: {
                 text: req.body.text,
+                title: req.body.title,
                 mediaUrl: req.file?.path,
                 mimeType: req.file?.mimetype,
                 author: {
                     connect: { id: res.locals.user.id }
                 },
                 channel: {
-                    connect: { name: req.params.channel }
+                    connect: { id: Number(req.params.channelId) }
                 }
             }
         });
@@ -102,6 +103,7 @@ postRouter.put('/posts/:id', verifyJWT(), isPostAuthor, upload.single("media"), 
             },
             data: {
                 text: req.body.text,
+                title: req.body.title,
                 mediaUrl: req.file?.path,
                 mimeType: req.file?.mimetype,
             }
@@ -113,14 +115,16 @@ postRouter.put('/posts/:id', verifyJWT(), isPostAuthor, upload.single("media"), 
 
 // react to a post
 postRouter.post('/:reactionType/posts/:id', verifyJWT(), async (req, res, next) => {
-    let reaction = req.params.reactionType.toLowerCase();
-    let vote: Vote = Vote.NONE;
-    if(reaction == 'upvote') vote = Vote.UP_VOTE;
-    else if(reaction == 'downvote') vote = Vote.DOWN_VOTE;
-    
+    const reaction = req.params.reactionType.toUpperCase();
     const postId = Number(req.params.id);
+    
+    let vote: Vote = Vote.NONE;
+    if(reaction == 'UP_VOTE') vote = Vote.UP_VOTE;
+    else if(reaction == 'DOWN_VOTE') vote = Vote.DOWN_VOTE;
+    else vote = Vote.NONE;
+    
     try {
-        const updated = await prisma.postReaction.upsert({
+        await prisma.postReaction.upsert({
             where: {
                 userId_postId: {
                     userId: res.locals.user.id,
@@ -140,6 +144,16 @@ postRouter.post('/:reactionType/posts/:id', verifyJWT(), async (req, res, next) 
                 }
             }
         });
+
+        const updated = countReaction(res.locals.user.id, await prisma.post.findUnique({
+            where: {
+                id : postId
+            },
+            include: {
+                reactions: true,
+            }
+        }));
+
         res.json(JSONResponse.success(updated));
     } catch (error) { next(error); }
 });

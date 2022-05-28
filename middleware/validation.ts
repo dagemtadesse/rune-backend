@@ -4,26 +4,18 @@ import { validationErrorHandler } from "./errors";
 export const registrationValidations = [
     body('fullname').isLength({ min: 4 }),
 
-    body('handle')
-        .isLength({ min: 3 }),
-
     body('email')
         .isEmail(),
 
     body('password')
-        .isStrongPassword({
-            minLength: 8,
-            minUppercase: 1,
-            minSymbols: 1
-        })
-        .withMessage("Password must be a minimum length of 8 and must contain uppercase and a special symbol"),
+        .isLength({min: 8}),
 
     validationErrorHandler
 ];
 
 // TODO implementation
 export const loginValidations = [
-    body('handle')
+    body('email')
         .isString(),
 
     body('password')
@@ -31,3 +23,5 @@ export const loginValidations = [
 
     validationErrorHandler
 ];
+
+// export const 

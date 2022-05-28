@@ -21,6 +21,6 @@ app.use(express.static(process.env.STORAGE_DIR!))
 
 const port = Number(process.env.PORT);
 
-app.listen(port, '192.168.12.1', () => {
+app.listen(port,  () => {
     console.log(`server running on ${port}`);
 });

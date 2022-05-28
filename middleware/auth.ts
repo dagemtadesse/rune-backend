@@ -13,6 +13,7 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
         const user = await prisma.user.create({ data: req.body });
         // pass the user to the next middleware
         res.locals.user = user;
+        res.locals.user.password = undefined;
         next();
     } catch (error) {
         next(error);
@@ -22,15 +23,16 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
 export async function authenticateUser(req: Request, res: Response, next: NextFunction) {
     const authFailure = JSONResponse.failure(undefined, 'The username and password do not match.', 401);
     try {
-        const reqUser = req.body as { handle: string, password: string };
+        const reqUser = req.body as { email: string, password: string };
         // find user from the db using requests handle form/object
-        const user = await prisma.user.findUnique({ where: { handle: reqUser.handle } })
+        const user = await prisma.user.findUnique({ where: { email: reqUser.email } })
         if (!user) throw authFailure;
         // compare the password of the user form db and from the request
         const authPassed = await bcrypt.compare(reqUser.password, user.password);
         if (!authPassed) throw authFailure;
         // pass the user to the next middleware
         res.locals.user = user;
+        res.locals.user.password = undefined;
         next();
     } catch (error) {
         next(error);

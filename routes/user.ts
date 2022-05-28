@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { verifyJWT } from "../middleware/jwt";
 import { prisma, upload } from ".";
 import JSONResponse from "../utils/response";
+import path from "path";
 
 export const userRouter = express.Router();
 // get user
@@ -15,18 +16,29 @@ userRouter.get('/user/:handle', verifyJWT(), async (req, res, next) => {
     } catch (error) { next(error); }
 });
 
+// get user
+userRouter.get('/user/id/:userId', verifyJWT(), async (req, res, next) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: Number(req.params.userId) }
+        });
+        res.json(JSONResponse.success(user));
+    } catch (error) { next(error); }
+});
+
+
 // update user
 userRouter.put('/user', verifyJWT(), upload.single("avatar"), async (req, res, next) => {
     // TODO: validation
     try {
         let updated = await prisma.user.update({
-            where: { id: res.locals.user.id },
+            where: { id: Number(res.locals.user.id) },
             data: {
                 handle: req.body.handle,
                 fullname: req.body.fullname,
                 email: req.body.email,
-                avatar: req.file?.path,
-                password: await bcrypt.hash(req.body.password, 14),
+                avatar: req.file ? path.basename(req.file?.path) : undefined,
+                password: req.body.password ? await bcrypt.hash(req.body.password, 14): undefined,
                 mimeType: req.file?.mimetype
             }
         });

@@ -24,7 +24,7 @@ enum Vote {
 model User {
   id              Int               @id @default(autoincrement())
   fullname        String
-  handle          String            @unique
+  handle          String?           @unique
   createdAt       DateTime          @default(now())
   email           String            @unique
   avatar          String?
@@ -32,20 +32,35 @@ model User {
   password        String
   role            Role              @default(USER)
   posts           Post[]
+  pinnedChannels  ChannelBookmark[]
   comments        Comment[]
   channels        Channel[]
   postReactions   PostReaction[]
   commentReaction CommentReaction[]
 }
 
+model ChannelBookmark {
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  channelId Int
+
+  user   User @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId Int
+
+  @@id([userId, channelId])
+}
+
 model Channel {
-  id       Int     @id @default(autoincrement())
-  name     String  @unique
-  logo     String?
-  mimeType String?
-  address  String
-  email    String  @unique
-  verified Boolean @default(false)
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  logo        String?
+  mimeType    String?
+  description String
+  address     String
+  email       String            @unique
+  verified    Boolean           @default(false)
+  createAt    DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  pinnedBy     ChannelBookmark[]
 
   author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId Int?
@@ -56,6 +71,7 @@ model Channel {
   parentChannelId Int?
 
   subChannels Channel[] @relation("channelHeirarchy")
+
 }
 
 model Comment {
@@ -74,12 +90,13 @@ model Comment {
   parentComment   Comment? @relation("commentHeirarchy", fields: [parentCommentId], references: [id], onDelete: Cascade)
   parentCommentId Int?
 
-  subCommnets     Comment[]         @relation("commentHeirarchy")
-  reactions CommentReaction[]
+  subCommnets Comment[]         @relation("commentHeirarchy")
+  reactions   CommentReaction[]
 }
 
 model Post {
   id       Int     @id @default(autoincrement())
+  title    String
   text     String
   mediaUrl String?
   mimeType String?
@@ -92,7 +109,7 @@ model Post {
   author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId Int?
 
-  channel   Channel @relation(fields: [channelId], references: [id],  onDelete: Cascade)
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
   channelId Int
 
   reactions PostReaction[]
@@ -110,12 +127,12 @@ model PostReaction {
 }
 
 model CommentReaction {
-  comment      Comment @relation(fields: [commentId], references: [id])
+  comment   Comment @relation(fields: [commentId], references: [id])
   commentId Int
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  vote   Vote @default(NONE)
+  vote Vote @default(NONE)
   @@unique([userId, commentId])
 }

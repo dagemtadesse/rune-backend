@@ -110,11 +110,11 @@ commentRouter.put('/comment/:id', verifyJWT(), isCommentAuthor, async (req, res,
 commentRouter.post('/:reactionType/comment/:id', verifyJWT(), async (req, res, next) => {
     try {
         let reaction = req.params.reactionType.toLowerCase();
+        const commentId = Number(req.params.id);
+        
         let vote: Vote = Vote.NONE;
         if(reaction == 'upvote') vote = Vote.UP_VOTE;
         else if(reaction == 'downvote') vote = Vote.DOWN_VOTE;
-
-        const commentId = Number(req.params.id);
 
         const updated = await prisma.commentReaction.upsert({
             where: {

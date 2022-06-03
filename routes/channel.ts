@@ -62,7 +62,7 @@ chanRouter.get('/channels', verifyJWT(), async (req, res, next) => {
 });
 
 // create a channel
-chanRouter.post("/channel", verifyJWT('ADMIN'), async (req, res, next) => {
+chanRouter.post("/channels", verifyJWT('ADMIN'), async (req, res, next) => {
     // TODO: data validation
     try {
         const channel = await prisma.channel.create({
@@ -81,7 +81,7 @@ chanRouter.post("/channel", verifyJWT('ADMIN'), async (req, res, next) => {
 });
 
 // update a channel
-chanRouter.put('/channel/:channelId', verifyJWT('ADMIN'), isChannelOwner, async (req, res, next) => {
+chanRouter.put('/channels/:channelId', verifyJWT('ADMIN'), isChannelOwner, upload.single("logo"), async (req, res, next) => {
     // TODO: validation
     try {
         const updated = await prisma.channel.update({
@@ -92,13 +92,15 @@ chanRouter.put('/channel/:channelId', verifyJWT('ADMIN'), isChannelOwner, async 
                 name: req.body.name,
                 address: req.body.address,
                 email: req.body.email,
-                description: req.body.description
+                description: req.body.description,
+                logo: req.file != null ? path.basename(req.file?.path) : null,
+                mimeType: req.file?.mimetype,
             }
         });
         if (!updated) {
             throw JSONResponse.failure(undefined, "unable to update channel", 404);
         }
-        res.status(201).json(JSONResponse.success());
+        res.status(201).json(JSONResponse.success(updated));
     } catch (error) { next(error) }
 });
 
@@ -145,7 +147,7 @@ chanRouter.put('/unpin/:channelId', verifyJWT(), async (req, res, next) => {
 });
 
 // delete a channel
-chanRouter.delete('/channel/:channelId', verifyJWT('ADMIN'), isChannelOwner, async (req, res, next) => {
+chanRouter.delete('/channels/:channelId', verifyJWT('ADMIN'), isChannelOwner, async (req, res, next) => {
     try {
         const deleted = await prisma.channel.delete({
             where: {

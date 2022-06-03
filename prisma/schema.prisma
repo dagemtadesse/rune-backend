@@ -26,6 +26,7 @@ model User {
   fullname        String
   handle          String?           @unique
   createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
   email           String            @unique
   avatar          String?
   mimeType        String?

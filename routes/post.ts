@@ -4,6 +4,7 @@ import { prisma, upload } from ".";
 import { verifyJWT } from "../middleware/jwt";
 import { countReaction } from "../utils/reaction";
 import JSONResponse from "../utils/response";
+import path from "path";
 
 export const postRouter = express.Router();
 
@@ -62,11 +63,14 @@ postRouter.get('/posts/:id', verifyJWT(), async (req, res, next) => {
 postRouter.delete('/posts/:id', verifyJWT(), isPostAuthor, async (req, res, next) => {
     try {
         const post = await prisma.post.delete({
-            where: {
+            where: { 
                 id: Number(req.params.id),
+            },
+            include: {
+                reactions: true
             }
         });
-        res.json(JSONResponse.success(post));
+        res.json(JSONResponse.success(countReaction(res.locals.user.id, post)));
     } catch (error) { next(error); }
 });
 
@@ -104,7 +108,7 @@ postRouter.put('/posts/:id', verifyJWT(), isPostAuthor, upload.single("media"), 
             data: {
                 text: req.body.text,
                 title: req.body.title,
-                mediaUrl: req.file?.path,
+                mediaUrl: req.file != null ? path.basename(req.file?.path) : null,
                 mimeType: req.file?.mimetype,
             }
         });
@@ -121,7 +125,7 @@ postRouter.post('/:reactionType/posts/:id', verifyJWT(), async (req, res, next) 
     let vote: Vote = Vote.NONE;
     if(reaction == 'UP_VOTE') vote = Vote.UP_VOTE;
     else if(reaction == 'DOWN_VOTE') vote = Vote.DOWN_VOTE;
-    else vote = Vote.NONE;
+
     
     try {
         await prisma.postReaction.upsert({

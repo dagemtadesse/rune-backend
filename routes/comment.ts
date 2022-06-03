@@ -50,7 +50,7 @@ commentRouter.get('/:postId/comments', verifyJWT(), async (req, res, next) => {
 });
 
 // get a comment
-commentRouter.get('/comment/:id', verifyJWT(), async (req, res, next) => {
+commentRouter.get('/comments/:id', verifyJWT(), async (req, res, next) => {
     // TODO: validation
     try {
         const comment = await prisma.comment.findUnique({
@@ -80,7 +80,7 @@ commentRouter.post('/post/:id/comment', verifyJWT(), async (req, res, next) => {
 });
 
 // delete comments
-commentRouter.delete('/comment/:id', verifyJWT(), isCommentAuthor, async (req, res, next) => {
+commentRouter.delete('/comments/:id', verifyJWT(), isCommentAuthor, async (req, res, next) => {
     // TODO: validation
     try {
         const comment = await prisma.comment.delete({
@@ -92,7 +92,7 @@ commentRouter.delete('/comment/:id', verifyJWT(), isCommentAuthor, async (req, r
 });
 
 // update comments
-commentRouter.put('/comment/:id', verifyJWT(), isCommentAuthor, async (req, res, next) => {
+commentRouter.put('/comments/:id', verifyJWT(), isCommentAuthor, async (req, res, next) => {
     // TODO: validation
     try {
         const updated = await prisma.comment.update({
@@ -107,7 +107,7 @@ commentRouter.put('/comment/:id', verifyJWT(), isCommentAuthor, async (req, res,
     } catch (error) { next(error); }
 });
 
-commentRouter.post('/:reactionType/comment/:id', verifyJWT(), async (req, res, next) => {
+commentRouter.post('/:reactionType/comments/:id', verifyJWT(), async (req, res, next) => {
     try {
         let reaction = req.params.reactionType.toLowerCase();
         const commentId = Number(req.params.id);

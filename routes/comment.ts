@@ -109,12 +109,12 @@ commentRouter.put('/comments/:id', verifyJWT(), isCommentAuthor, async (req, res
 
 commentRouter.post('/:reactionType/comments/:id', verifyJWT(), async (req, res, next) => {
     try {
-        let reaction = req.params.reactionType.toLowerCase();
+        let reaction = req.params.reactionType.toUpperCase();
         const commentId = Number(req.params.id);
         
         let vote: Vote = Vote.NONE;
-        if(reaction == 'upvote') vote = Vote.UP_VOTE;
-        else if(reaction == 'downvote') vote = Vote.DOWN_VOTE;
+        if(reaction == 'UP_VOTE') vote = Vote.UP_VOTE;
+        else if(reaction == 'DOWN_VOTE') vote = Vote.DOWN_VOTE;
 
         const updated = await prisma.commentReaction.upsert({
             where: {
@@ -136,7 +136,17 @@ commentRouter.post('/:reactionType/comments/:id', verifyJWT(), async (req, res, 
                 }
             }
         });
-        res.json(JSONResponse.success(updated));
+        res.json(
+        	JSONResponse.success(countReaction(res.locals.user.id, 
+        	await prisma.comment.findUnique({
+		    where: {
+		        id : commentId
+		    },
+		    include: {
+		        reactions: true,
+		    }
+		})
+        )));
     } catch (error) { next(error); }
 });
 

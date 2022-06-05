@@ -4,6 +4,7 @@ import { verifyJWT } from "../middleware/jwt";
 import { prisma, upload } from ".";
 import JSONResponse from "../utils/response";
 import path from "path";
+import { Role } from "@prisma/client";
 
 export const userRouter = express.Router();
 // get user
@@ -37,6 +38,7 @@ userRouter.put('/user', verifyJWT(), upload.single("avatar"), async (req, res, n
                 handle: req.body.handle,
                 fullname: req.body.fullname,
                 email: req.body.email,
+                role: req.body.grantAdminStatus ? Role.ADMIN :  Role.USER,
                 avatar: req.file ? path.basename(req.file?.path) : undefined,
                 password: req.body.password ? await bcrypt.hash(req.body.password, 14): undefined,
                 mimeType: req.file?.mimetype
